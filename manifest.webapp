@@ -1,0 +1,41 @@
+{
+  "name": "Sunset",
+  "description": "Save your eyeballs by changing the color balance of your screen throughout the day. Set preferences under Settings > Display.",
+  "developer": {
+    "name": "April King",
+    "url": "https://github.com/marumari/sunset-fxos-addon"
+  },
+  "role": "addon",
+  "type": "certified",
+  "version": "1.0",
+
+  "default_locale": "en",
+
+  "icons": {
+    "128": "/img/sunset-128.png",
+    "512": "/img/sunset-512.png"
+  },
+  "launch_path": "index.html",
+
+  "customizations": [{
+    "filter": "system.gaiamobile.org",
+    "css": [],
+    "scripts": ["js/system.js"]
+    },
+    {
+    "filter": "settings.gaiamobile.org",
+    "css": [],
+    "scripts": ["js/settings.js"]
+    }
+  ],
+
+  "permissions": {
+    "geolocation": {
+      "description": "Course-grained geolocation needed to determine sunset times"
+    },
+    "settings": {
+      "access": "readwrite",
+      "description": "Used for inter-process communication with System application"
+    }
+  }
+}

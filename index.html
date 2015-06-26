@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1">
+  <meta name="defaultLanguage" content="en-US">
+
+  <title>Sunset</title>
+
+  <link rel="stylesheet" href="css/lists.css">
+  <link rel="stylesheet" href="css/settings.css">
+  <link rel="stylesheet" href="css/sunset.css">
+  <link rel="stylesheet" href="css/style/layout.css">
+  <link rel="stylesheet" href="css/style/input_areas.css">
+  <link rel="stylesheet" href="css/style/headers.css">
+  <link rel="stylesheet" href="css/style/switches.css">
+
+  <script src="js/sunset.js"></script>
+</head>
+<body class="skin-organic" role="application">
+  <section role="region">
+    <header>
+      <h1 style="font-size: 23px;">Sunset</h1>
+    </header>
+    <div>
+      <ul>
+        <li class="hint">
+          <label class="pack-switch">
+            <input id="sunset-enabled" type="checkbox" checked>
+            <span>
+              Enabled
+            </span>
+          </label>
+          <p class="explanation">
+            Enable the screen filter
+          </p>
+        </li>
+        <li id="geolocation-enabled" class="hint">
+          <label class="pack-switch">
+            <input type="checkbox" checked>
+            <span>
+              Geolocate
+            </span>
+          </label>
+          <p class="explanation">
+            Use geolocation API to determine sunset times
+          </p>
+        </li>
+        <li>
+          <label style="padding: 1rem 1.5rem;">
+            <span style="display: inline-block;">
+              Manual Location
+            </span>
+            <div style="float: right; padding-top: .75rem;">
+              <input type="text" placeholder="City or ZIP" style="float: right; padding: 0 .5rem; width: 75%;" disabled>
+            </div>
+          </label>
+        </li>
+      </ul>
+    </div>
+  </section>
+</body>
+</html>
