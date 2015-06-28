@@ -14,6 +14,8 @@
   <link rel="stylesheet" href="css/style/input_areas.css">
   <link rel="stylesheet" href="css/style/headers.css">
   <link rel="stylesheet" href="css/style/switches.css">
+  <link rel="stylesheet" href="css/style/seekbars.css">
+  <link rel="stylesheet" href="css/style/icons.css">
 
   <script src="js/sunset.js"></script>
 </head>
@@ -25,21 +27,23 @@
     <div>
       <ul>
         <li class="hint">
-          <label class="pack-switch">
-            <input id="sunset-enabled" type="checkbox" checked>
-            <span>
-              Enabled
-            </span>
-          </label>
+          <h2>Filter Strength</h2>
+          <section role="slider">
+            <label class="gaia-icon icon-settings-brightness-lower"></label>
+            <label class="gaia-icon icon-settings-brightness"></label>
+            <div>
+              <input id="sunset-max-alpha" type="range" min="4" max="50" value="25">
+            </div>
+          </section>
           <p class="explanation">
-            Enable the screen filter
+            Adjust how strong the screen filter is
           </p>
         </li>
-        <li id="geolocation-enabled" class="hint">
+        <li class="hint">
           <label class="pack-switch">
-            <input type="checkbox" checked>
+            <input id="geolocation-enabled" type="checkbox" disabled>
             <span>
-              Geolocate
+              Geolocate (TODO)
             </span>
           </label>
           <p class="explanation">
@@ -49,15 +53,34 @@
         <li>
           <label style="padding: 1rem 1.5rem;">
             <span style="display: inline-block;">
-              Manual Location
+              Manual Sunrise Time (TODO)
             </span>
-            <div style="float: right; padding-top: .75rem;">
-              <input type="text" placeholder="City or ZIP" style="float: right; padding: 0 .5rem; width: 75%;" disabled>
+            <div>
+              <input id="sunset-manual-sunrise" type="time" value="06:00:00">
             </div>
           </label>
         </li>
+        <li>
+          <label style="padding: 1rem 1.5rem;">
+            <span style="display: inline-block;">
+              Manual Sunset Time (TODO)
+            </span>
+            <div>
+              <input id="sunset-manual-sunset" type="time" value="18:00:00">
+            </div>
+          </label>
+        </li>
+<!--    <li>
+          <label style="padding: 1rem 1.5rem;">
+            <span style="display: inline-block;">
+              Manual Location (TODO)
+            </span>
+            <div style="float: right; padding-top: .75rem;">
+              <input id="geolocation-location" type="text" placeholder="City or ZIP" style="float: right; padding: 0 .5rem; width: 75%;" disabled>
+            </div>
+          </label>
+        </li> -->
       </ul>
     </div>
-  </section>
-</body>
-</html>
+  </body>
+  </html>
