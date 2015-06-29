@@ -101,11 +101,11 @@ var Sunset = (function() {
     filter.style.position = 'absolute';
     filter.style.top = 0;
     filter.style.width = '100%';
-    filter.style.zIndex = '25000'; // above #utility-tray, below #software-buttons-fullscreen-layout
+    filter.style.zIndex = '80000'; // above #utility-tray (16385), below #software-buttons-fullscreen-layout (auto -> 90000), above #cards-view (65535)
 
     /* adjust the z-index of the taskbar on the bottom, so that sunset doesn't affect it;
        hopefully this doesn't break something horribly */
-    document.getElementById('software-buttons-fullscreen-layout').style.zIndex = 30000;
+    document.getElementById('software-buttons-fullscreen-layout').style.zIndex = 90000;
 
     /* append the screen filter to the system app */
     document.body.appendChild(filter);
