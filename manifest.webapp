@@ -16,6 +16,7 @@
     "512": "/img/sunset-512.png"
   },
   "launch_path": "index.html",
+  "package_path": "package.zip",
 
   "customizations": [{
     "filter": "system.gaiamobile.org",
