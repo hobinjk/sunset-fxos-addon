@@ -135,6 +135,17 @@ var Sunset = (function() {
       clearTimeout(window._sunsetTimer);
     }
 
+    /* Call toggle every minute so that the filter gets darker and brighter throughout the day */
+    window._sunsetTimer = setTimeout(function () {
+      toggle.call(this, true);
+    }, 60000);
+
+    /* Sometimes the Settings API is a bit slow in feeding into SunsetSettings; we'll just return and catch it the
+       next time about */
+    if (!('screen.sunset.manual-sunset' in SunsetSettings)) {
+      return;
+    }
+
     /* Calculate the current time, as well as the sunrise and sunset times, in terms of minutes into the day */
     var curTime = new Date();
     curTime = curTime.getHours() * 60 + curTime.getMinutes();
@@ -170,11 +181,6 @@ var Sunset = (function() {
       setAlpha(alpha, brightness);
     }
 
-    /* Call toggle every minute so that the filter gets darker and brighter throughout the day */
-    window._sunsetTimer = setTimeout(function () {
-      toggle(true).bind(this);
-    }, 60000);
-
   }
 
   /* Remove the screen filter (for performance), set the software button panel's zindex back to auto, and
@@ -191,7 +197,8 @@ var Sunset = (function() {
     inject: inject,
     removeFilter: removeFilter,
     setAlpha: setAlpha,
-    setUp: setUp
+    setUp: setUp,
+    toggle: toggle
   };
 }());
 

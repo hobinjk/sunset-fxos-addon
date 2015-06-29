@@ -24,6 +24,9 @@ function launchSunset() {
    mutation observer to catch these changes */
 function hideShowSunsetSettings () {
   'use strict';
+  if (!('_addonDetailsHeaderNode' in window)) {
+    return;
+  }
 
   if (window._addonDetailsHeaderNode.textContent === 'Sunset') {
     document.getElementById('addon-sunset-launcher-container').style.display = '';
