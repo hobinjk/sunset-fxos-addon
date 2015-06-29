@@ -6,29 +6,35 @@ var Sunset = (function() {
   var DEFAULT_SETTINGS = {
     'screen.sunset.geolocate': true,
     'screen.sunset.max-alpha': 25,
-    'screen.sunset.manual-sunrise': '06:00:00',
-    'screen.sunset.manual-sunset': '18:00:00'
+    'screen.sunset.manual-sunrise': '07:00',
+    'screen.sunset.manual-sunset': '20:00'
   };
 
-  function geolocate() {
-    // TODO
-  }
+  /* Replicate the Sunset settings into SunsetSettings, so we don't have to constantly make async
+     calls to the painful Settings API */
+  var SunsetSettings = {};
 
-  function getSunriseSunset() {
-    // TODO
+  function syncMozSettings(event) {
+    console.log('entering syncMozSettings()');
+    SunsetSettings[String(event.settingName)] = event.settingValue;
+    toggle(true);
+    console.log(SunsetSettings);
   }
 
   function setUp() {
     console.log('entering setUp()');
 
     for (var setting in DEFAULT_SETTINGS) {
-      setDefaultValue(setting, DEFAULT_SETTINGS[setting]);
+      setUpGetSetMonitorValues(setting, DEFAULT_SETTINGS[setting]);
     }
   }
 
-  function setDefaultValue(setting, value) {
+  function setUpGetSetMonitorValues(setting, value) {
     setting = String(setting);
-    console.log('entering setDefaultValue() to set ' + setting + 'to ' + String(value));
+    console.log('entering setUpGetSetMonitorValues() to set ' + setting + 'to ' + String(value));
+
+    var syncevent = {};
+    syncevent.settingName = setting;
 
     var req = navigator.mozSettings.createLock().get(setting);
     req.onsuccess = function () {
@@ -37,24 +43,35 @@ var Sunset = (function() {
         var obj = {};
         obj[setting] = value;
         navigator.mozSettings.createLock().set(obj);
+
+        syncevent.settingValue = value;
       } else {
+        syncevent.settingValue = req.result[setting];
         console.log('setting ' + setting + ' already found as: ' + req.result[setting]);
       }
-    };
 
+      console.log('attempting to setup observer');
+      navigator.mozSettings.addObserver(setting, syncMozSettings);
+
+      syncMozSettings(syncevent);
+    };
   }
 
   function init() {
     console.log('entering init()');
     /* Set the listeners, launching Sunset whenever it gets enabled */
-    navigator.mozApps.mgmt.onuninstall = uninstall;
+    navigator.mozApps.mgmt.onuninstall = function() {
+      clearTimeout(window._sunsetTimer);
+      removeFilter();
+    };
     navigator.mozApps.mgmt.onenabledstatechange = function(event) {
       toggle(event.application.enabled);
     };
 
-    /* Set the listener that checks for changes from Sunset.app to screen.sunset.enabled */
-    // navigator.mozSettings.addObserver('screen.sunset.enabled', function (event) { toggle(event.settingValue); });
-    navigator.mozSettings.addObserver('screen.sunset.max-alpha', function (event) { toggle(true); });
+    // navigator.mozSettings.addObserver('screen.sunset.max-alpha', function (event) {
+    //   console.log(event);
+    //   toggle(true);
+    // });
 
     /* Turn the darned thing on */
     toggle(true);
@@ -91,44 +108,78 @@ var Sunset = (function() {
 
   /* Set the alpha transparency of the screen filter */
   function setAlpha(alpha) {
-    console.log('entering setAlpha() with alpha of ' + String(alpha / 100));
+    console.log('entering setAlpha() with alpha of ' + String(alpha));
 
     var filter = document.getElementById('sunset');
-    filter.style.backgroundColor = 'rgba(255, 255, 0, ' + String(alpha / 100) + ')';
+    filter.style.backgroundColor = 'rgba(255, 255, 0, ' + String(alpha) + ')';
   }
 
   /* Toggle the screen filter on and off */
   function toggle(onoff) {
     console.log('entering toggle()');
+    var diff = 0;
 
     if (onoff === true) {
       inject();
-
-      var lock = navigator.mozSettings.createLock();
-      var req = lock.get('screen.sunset.max-alpha');
-      req.onsuccess = function () {
-        setAlpha(req.result['screen.sunset.max-alpha']);
-      };
     } else {
-      uninstall(); // I could just set the alpha to zero, but presumably removing the div will increase performance
+      removeFilter();
+      return;
     }
+
+    if (window._sunsetTimer) {
+      clearTimeout(window._sunsetTimer);
+    }
+
+    var curTime = new Date();
+    curTime = curTime.getHours() * 60 + curTime.getMinutes();
+
+    var sunriseTime = SunsetSettings['screen.sunset.manual-sunrise'].split(':');
+    sunriseTime = Number(sunriseTime[0]) * 60 + Number(sunriseTime[1]);
+
+    var sunsetTime = SunsetSettings['screen.sunset.manual-sunset'].split(':');
+    sunsetTime = Number(sunsetTime[0]) * 60 + Number(sunsetTime[1]);
+
+    if (curTime < sunriseTime) {
+      diff = sunriseTime - curTime;
+    } else if (curTime > (sunsetTime - 60)) { // 60 minutes before sunset
+      diff = Math.abs(sunsetTime - 60 - curTime);
+    } else {
+      removeFilter();
+      return;
+    }
+
+    console.log('the sun is down with a difference of ' + String(diff) + ' - let\'s do this!');
+    if (diff >= 60) { diff = 1; }
+    else if (diff > 0) { diff = diff / 60; }
+
+    /* Calculate the correct alpha setting, based on the time of day */
+    if (diff !== 0) {
+      var alpha = (SunsetSettings['screen.sunset.max-alpha'] / 100 * diff).toFixed(3);
+      console.log('setting alpha to ' + alpha);
+      setAlpha(alpha);
+    }
+
+    window._sunsetTimer = setTimeout(function () {
+      toggle(true).bind(this);
+    }, 60000);
+
     console.log('exiting toggle()');
   }
 
-  function uninstall() {
-    console.log('entering uninstall()');
+  function removeFilter() {
+    console.log('entering removeFilter()');
     var filter = document.getElementById('sunset');
     filter.parentNode.removeChild(filter);
-    console.log('exiting uninstall()');
+    console.log('exiting removeFilter()');
   }
 
 
   return {
     init: init,
     inject: inject,
+    removeFilter: removeFilter,
     setAlpha: setAlpha,
-    setUp: setUp,
-    uninstall: uninstall
+    setUp: setUp
   };
 }());
 
@@ -142,7 +193,7 @@ if (document.documentElement) {
   window.addEventListener('DOMContentLoaded', function () {
     'use strict';
     console.log('enabling sunset inside system on startup');
-
+    Sunset.setUp();
     Sunset.inject();
     Sunset.init();
   });
