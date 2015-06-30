@@ -18,7 +18,7 @@ var Sunset = (function() {
   var SunsetSettings = {};
   function syncMozSettings(event) {
     SunsetSettings[String(event.settingName)] = event.settingValue;
-    toggle(true);
+    toggle();
   }
 
   /* Whenever the application is initialized, we need to do some setup to:
@@ -29,6 +29,10 @@ var Sunset = (function() {
     for (var setting in DEFAULT_SETTINGS) {
       setUpGetSetMonitorValues(setting, DEFAULT_SETTINGS[setting]);
     }
+
+    /* Call toggle() whenever the attributes on 'screen' change (particularly locked), to set size to 100% */
+    window._sunsetSoftwareButtonMO = new MutationObserver(toggle);
+    window._sunsetSoftwareButtonMO.observe(document.getElementById('screen'), { attributes: true });
   }
 
   function setUpGetSetMonitorValues(setting, value) {
@@ -76,8 +80,11 @@ var Sunset = (function() {
       toggle(event.application.enabled);
     };
 
+    /* whenever the screen's orientation changes, call toggle to set the width/height calc setting properly */
+    window.addEventListener('orientationchange', toggle);
+
     /* We've finally done it! Turn the filter on! Maybe even grab a beer! */
-    toggle(true);
+    toggle();
   }
 
   /* inject() injects the (invisible) screen filter and toggles the z-indicies properly so that the filter
@@ -101,11 +108,11 @@ var Sunset = (function() {
     filter.style.position = 'absolute';
     filter.style.top = 0;
     filter.style.width = '100%';
-    filter.style.zIndex = '80000'; // above #utility-tray (16385), below #software-buttons-fullscreen-layout (auto -> 90000), above #cards-view (65535)
 
-    /* adjust the z-index of the taskbar on the bottom, so that sunset doesn't affect it;
-       hopefully this doesn't break something horribly */
-    document.getElementById('software-buttons-fullscreen-layout').style.zIndex = '90000';
+    /* above #utility-tray (16385), below #software-buttons-fullscreen-layout (auto -> 90000), above #cards-view (65535)
+       unfortunately, I have to choose between the filter showing up on screen long presses >=cards-view, or covering the
+       software buttons < cards-view */
+    filter.style.zIndex = '80000'; // above #utility-tray (16385), above #cards-view (65535)
 
     /* append the screen filter to the system app */
     document.body.appendChild(filter);
@@ -122,11 +129,12 @@ var Sunset = (function() {
   function toggle(onoff) {
     var diff = 0;
 
-    if (onoff === true) {
-      inject(); // inject just in case the filter got removed with removeFilter()
-    } else {
+    /* if onoff is set to false (like on disabling), kill everything */
+    if (onoff === false) {
       removeFilter(); // remove the filter from the screen and get out of here
       return;
+    } else {
+      inject(); // inject just in case the filter got removed with removeFilter
     }
 
     /* We never want more than a single timer to be called to be set on the global scope, else we end up calling
@@ -137,13 +145,30 @@ var Sunset = (function() {
 
     /* Call toggle every minute so that the filter gets darker and brighter throughout the day */
     window._sunsetTimer = setTimeout(function () {
-      toggle.call(this, true);
+      toggle.call(this);
     }, 60000);
 
     /* Sometimes the Settings API is a bit slow in feeding into SunsetSettings; we'll just return and catch it the
        next time about */
     if (!('screen.sunset.manual-sunset' in SunsetSettings)) {
       return;
+    }
+
+    /* to avoid having to mess with the software button's z-index, we calculate its height, and then set the
+       screen filter's width/height to 100% minus that size */
+    var filter = document.getElementById('sunset');
+    var taskbar = document.getElementById('software-buttons-fullscreen-layout');
+
+    /* if it's a locked screen or there are no software buttons(!!), set the width and height to 100% */
+    if ((document.getElementById('screen').className.split(/\s+/).indexOf('locked') !== -1) || (taskbar === null)) {
+      filter.style.height = '100%';
+      filter.style.width = '100%';
+    } else if (taskbar.clientWidth > taskbar.clientHeight) { // software buttons on the bottom
+      filter.style.height = 'calc(100% - ' + String(taskbar.clientHeight) + 'px';
+      filter.style.width = '100%';
+    } else { // software buttons on the right
+      filter.style.height = '100%';
+      filter.style.width = 'calc(100% - ' + String(taskbar.clientWidth) + 'px';
     }
 
     /* Calculate the current time, as well as the sunrise and sunset times, in terms of minutes into the day */
@@ -188,7 +213,6 @@ var Sunset = (function() {
   function removeFilter() {
     var filter = document.getElementById('sunset');
     filter.parentNode.removeChild(filter);
-    document.getElementById('software-buttons-fullscreen-layout').style.zIndex = 'auto';
     document.getElementById('software-home-button').style.filter = 'none';
   }
 
