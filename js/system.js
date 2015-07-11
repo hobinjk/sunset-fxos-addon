@@ -77,7 +77,10 @@ var Sunset = (function() {
 
     /* When you enable/disable the add-on, call toggle to see if the filter should be added or destroyed */
     navigator.mozApps.mgmt.onenabledstatechange = function(event) {
-      toggle(event.application.enabled);
+      var app = event.application;
+      if (app.manifest.name === 'Sunset') {
+        toggle(app.enabled);
+      }
     };
 
     /* whenever the screen's orientation changes, call toggle to set the width/height calc setting properly */
