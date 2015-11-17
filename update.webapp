@@ -1,0 +1,25 @@
+{
+  "name": "Sunset",
+  "description": "Save your eyeballs by changing the color balance of your screen throughout the day.",
+  "developer": {
+    "name": "April King",
+    "url": "https://github.com/marumari/sunset-fxos-addon"
+  },
+  "version": "1.0",
+  "default_locale": "en",
+  "icons": {
+    "128": "/img/sunset-128.png",
+    "512": "/img/sunset-512.png"
+  },
+  "launch_path": "index.html",
+  "package_path": "package.zip",
+  "permissions": {
+    "geolocation": {
+      "description": "Course-grained geolocation needed to determine sunset times"
+    },
+    "settings": {
+      "access": "readwrite",
+      "description": "Used for inter-process communication with System application"
+    }
+  }
+}
