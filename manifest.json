@@ -1,11 +1,9 @@
 {
-  "name": "Sunset",
+  "name": "Sunrise",
   "description": "Save your eyeballs by changing the color balance of your screen throughout the day.",
+  "manifest_version": 2,
   "version": "1.0",
-  "icons": {
-    "128": "/img/sunset-128.png",
-    "512": "/img/sunset-512.png"
-  },
+  "author": "April King",
   "content_scripts": [
     {
       "matches": [
@@ -15,26 +13,10 @@
       "js": [
         "js/system.js"
       ]
-    },
-    {
-      "matches": [
-        "app://settings.gaiamobile.org/index.html"
-      ],
-      "css": [],
-      "js": [
-        "js/settings.js"
-      ]
     }
   ],
-  "permissions": {
-    "geolocation": {
-      "description": "Course-grained geolocation needed to determine sunset times"
-    },
-    "settings": {
-      "access": "readwrite",
-      "description": "Used for inter-process communication with System application"
-    }
-  },
-  "manifest_version": 2,
-  "author": "April King"
+  "icons": {
+    "128": "img/sunset-128.png",
+    "512": "img/sunset-512.png"
+  }
 }
